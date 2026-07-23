@@ -30,6 +30,7 @@ async function getProjects() {
   });
   return projects.map((p) => ({
     ...p,
+    description: p.description ?? undefined,
     createdAt: new Date(p.createdAt),
     updatedAt: new Date(p.updatedAt),
   }));
