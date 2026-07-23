@@ -40,9 +40,15 @@ function categorizeTasksNew(tasks: Task[]) {
   const overdue: Task[] = [];
   const today: Task[] = [];
   const next7: Task[] = [];
+  const noDeadline: Task[] = [];
 
   tasks.forEach((task) => {
-    if (task.completed || !task.deadline) return;
+    if (task.completed) return;
+
+    if (!task.deadline) {
+      noDeadline.push(task);
+      return;
+    }
 
     const deadline = new Date(task.deadline);
     deadline.setHours(0, 0, 0, 0);
@@ -59,12 +65,12 @@ function categorizeTasksNew(tasks: Task[]) {
     }
   });
 
-  return { overdue, today, next7 };
+  return { overdue, today, next7, noDeadline };
 }
 
 export default async function HomePage() {
   const [tasks, projects] = await Promise.all([getTasks(), getProjects()]);
-  const { overdue, today, next7 } = categorizeTasksNew(tasks);
+  const { overdue, today, next7, noDeadline } = categorizeTasksNew(tasks);
 
   return (
     <div>
@@ -79,6 +85,8 @@ export default async function HomePage() {
       <TaskSection title="Today" tasks={today} emoji="🔴" />
 
       <TaskSection title="Next 7 Days" tasks={next7} emoji="📅" />
+
+      <TaskSection title="All Tasks (No Deadline)" tasks={noDeadline} emoji="📝" />
 
       <RecentProjects projects={projects} />
     </div>
