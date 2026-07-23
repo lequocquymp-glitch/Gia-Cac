@@ -14,7 +14,7 @@ export type Task = {
   description?: string;
   importance: "high" | "medium" | "low";
   status: "todo" | "doing" | "waiting" | "done";
-  deadline?: Date;
+  deadline?: Date | null;
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
