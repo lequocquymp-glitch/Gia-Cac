@@ -12,8 +12,8 @@ export type Task = {
   projectId?: string | null;
   title: string;
   description?: string | null;
-  importance: "high" | "medium" | "low";
-  status: "todo" | "doing" | "waiting" | "done";
+  importance: string;
+  status: string;
   deadline?: Date | null;
   completed: boolean;
   createdAt: Date;
