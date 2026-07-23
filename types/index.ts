@@ -9,9 +9,9 @@ export type Project = {
 
 export type Task = {
   id: string;
-  projectId?: string;
+  projectId?: string | null;
   title: string;
-  description?: string;
+  description?: string | null;
   importance: "high" | "medium" | "low";
   status: "todo" | "doing" | "waiting" | "done";
   deadline?: Date | null;
