@@ -17,7 +17,7 @@ async function getTasks(): Promise<Task[]> {
     deadline: t.deadline ? new Date(t.deadline) : null,
     createdAt: new Date(t.createdAt),
     updatedAt: new Date(t.updatedAt),
-  }));
+  })) as Task[];
 }
 
 async function getProjects() {
