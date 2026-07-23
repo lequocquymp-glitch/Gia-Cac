@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id        String     @id @default(cuid())
+  name      String
+  description String?
+  status    String     @default("active") // active, archived
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  tasks      Task[]
+  knowledge  Knowledge[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  projectId   String?
+  title       String
+  description String?
+  importance  String    @default("medium") // high, medium, low
+  status      String    @default("todo") // todo, doing, waiting, done
+  deadline    DateTime?
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([deadline])
+  @@index([completed])
+  @@index([createdAt])
+}
+
+model Knowledge {
+  id        String    @id @default(cuid())
+  projectId String
+  title     String
+  type      String    // sop, policy, workflow, checklist, guideline, meeting_note, document
+  content   String
+  tags      String    @default("") // comma-separated tags
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([type])
+  @@index([createdAt])
+}
