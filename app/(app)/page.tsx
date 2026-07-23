@@ -14,10 +14,12 @@ async function getTasks(): Promise<Task[]> {
   });
   return tasks.map((t) => ({
     ...t,
-    deadline: t.deadline ? new Date(t.deadline) : null,
+    projectId: t.projectId ?? undefined,
+    description: t.description ?? undefined,
+    deadline: t.deadline ? new Date(t.deadline) : undefined,
     createdAt: new Date(t.createdAt),
     updatedAt: new Date(t.updatedAt),
-  })) as Task[];
+  }));
 }
 
 async function getProjects() {
