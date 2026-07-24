@@ -91,69 +91,106 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
     }
   };
 
+  // Website tự phân loại: 4 nhóm
+  const done = tasks.filter((t) => t.completed);
+  const active = tasks.filter((t) => !t.completed);
+  const overdue = active.filter((t) => getTimelineColor(t.deadline) === "overdue");
+  const soon = active.filter((t) => {
+    const c = getTimelineColor(t.deadline);
+    return t.deadline && (c === "today" || c === "1-2days" || c === "3-7days");
+  });
+  const later = active.filter(
+    (t) => getTimelineColor(t.deadline) === "more7days"
+  );
+
+  const renderTask = (task: Task) => (
+    <div
+      key={task.id}
+      className="flex items-center gap-3 p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors group"
+    >
+      <button
+        onClick={() => handleComplete(task.id, task.completed)}
+        className="flex-shrink-0 w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center hover:border-blue-500 transition-colors"
+      >
+        {task.completed && <span className="text-blue-600">✓</span>}
+      </button>
+      {task.deadline && (
+        <span
+          className={`flex-shrink-0 w-2.5 h-2.5 rounded-full ${getColorDot(
+            getTimelineColor(task.deadline)
+          )}`}
+          title={getColorLabel(getTimelineColor(task.deadline))}
+        />
+      )}
+      <span
+        className={`flex-1 ${
+          task.completed ? "line-through text-gray-400" : "text-gray-900"
+        }`}
+      >
+        {task.title}
+      </span>
+      {task.deadline && (
+        <span className="text-xs text-gray-500 flex-shrink-0">
+          {formatDate(task.deadline)}
+        </span>
+      )}
+      <input
+        type="date"
+        value={toDateInputValue(task.deadline)}
+        onChange={(e) => handleDeadlineChange(task.id, e.target.value)}
+        className="flex-shrink-0 text-xs text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400"
+      />
+      <button
+        onClick={() => handleDelete(task.id)}
+        className="text-xs text-red-600 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+      >
+        Delete
+      </button>
+    </div>
+  );
+
+  const groups = [
+    { key: "overdue", emoji: "🔥", label: "Quá hạn", items: overdue, accent: "text-gray-800", box: "border-gray-300 bg-gray-50" },
+    { key: "soon", emoji: "📅", label: "Cần làm (trong 7 ngày)", items: soon, accent: "text-orange-600", box: "border-orange-200 bg-orange-50" },
+    { key: "later", emoji: "🗓️", label: "Còn xa", items: later, accent: "text-green-700", box: "border-green-200 bg-green-50" },
+    { key: "done", emoji: "✅", label: "Đã hoàn thành", items: done, accent: "text-gray-400", box: "border-gray-200 bg-white" },
+  ];
+
   return (
     <div>
       {tasks.length === 0 && !showInput ? (
         <div className="text-center py-12 text-gray-500">
-          <p className="mb-4">No tasks yet.</p>
+          <p className="mb-4">Chưa có công việc nào.</p>
           <button
             onClick={() => setShowInput(true)}
             className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2 mx-auto"
           >
             <Plus size={16} />
-            Add your first task
+            Thêm công việc đầu tiên
           </button>
         </div>
       ) : (
         <>
-          <div className="space-y-2 mb-4">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="flex items-center gap-3 p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors group"
-              >
-                <button
-                  onClick={() => handleComplete(task.id, task.completed)}
-                  className="flex-shrink-0 w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center hover:border-blue-500 transition-colors"
+          <div className="space-y-5 mb-4">
+            {groups.map((group) =>
+              group.items.length === 0 ? null : (
+                <section
+                  key={group.key}
+                  className={`rounded-xl border p-4 ${group.box}`}
                 >
-                  {task.completed && <span className="text-blue-600">✓</span>}
-                </button>
-                {task.deadline && (
-                  <span
-                    className={`flex-shrink-0 w-2.5 h-2.5 rounded-full ${getColorDot(
-                      getTimelineColor(task.deadline)
-                    )}`}
-                    title={getColorLabel(getTimelineColor(task.deadline))}
-                  />
-                )}
-                <span
-                  className={`flex-1 ${
-                    task.completed
-                      ? "line-through text-gray-400"
-                      : "text-gray-900"
-                  }`}
-                >
-                  {task.title}
-                </span>
-                {task.deadline && (
-                  <span className="text-xs text-gray-500 flex-shrink-0">
-                    {formatDate(task.deadline)}
-                  </span>
-                )}
-                <input
-                  type="date"
-                  value={toDateInputValue(task.deadline)}
-                  onChange={(e) => handleDeadlineChange(task.id, e.target.value)}
-                  className="flex-shrink-0 text-xs text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                />
-                <button
-                  onClick={() => handleDelete(task.id)}
-                  className="text-xs text-red-600 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
+                  <h3
+                    className={`text-sm font-bold mb-3 flex items-center gap-2 ${group.accent}`}
+                  >
+                    <span>{group.emoji}</span>
+                    {group.label}
+                    <span className="text-xs font-normal text-gray-400">
+                      ({group.items.length})
+                    </span>
+                  </h3>
+                  <div className="space-y-2">{group.items.map(renderTask)}</div>
+                </section>
+              )
+            )}
           </div>
 
           {showInput && (
@@ -162,7 +199,7 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Add a new task..."
+                placeholder="Thêm công việc mới..."
                 autoFocus
                 disabled={loading}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
@@ -172,7 +209,7 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
                 disabled={loading || !title.trim()}
                 className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                Add
+                Thêm
               </button>
               <button
                 type="button"
@@ -182,7 +219,7 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
                 }}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
               >
-                Cancel
+                Huỷ
               </button>
             </form>
           )}
@@ -193,7 +230,7 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
               className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
             >
               <Plus size={16} />
-              Add task
+              Thêm công việc
             </button>
           )}
         </>
