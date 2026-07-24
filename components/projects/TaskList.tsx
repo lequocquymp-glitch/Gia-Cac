@@ -17,6 +17,7 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
   const [tasks, setTasks] = useState(initialTasks);
   const [showInput, setShowInput] = useState(false);
   const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -34,6 +35,7 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
         body: JSON.stringify({
           projectId,
           title: title.trim(),
+          description: desc.trim(),
           importance: "medium",
           status: "todo",
         }),
@@ -43,6 +45,7 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
         const newTask = await res.json();
         setTasks([newTask, ...tasks]);
         setTitle("");
+        setDesc("");
         setShowInput(false);
         router.refresh();
       }
@@ -289,33 +292,47 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
           </div>
 
           {showInput && (
-            <form onSubmit={handleAddTask} className="flex gap-2 mb-4">
+            <form
+              onSubmit={handleAddTask}
+              className="mb-4 p-3 bg-white rounded-lg border border-blue-200 space-y-2"
+            >
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Thêm công việc mới..."
+                placeholder="Tiêu đề cần thực hiện"
                 autoFocus
                 disabled={loading}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               />
-              <button
-                type="submit"
-                disabled={loading || !title.trim()}
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                Thêm
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowInput(false);
-                  setTitle("");
-                }}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-              >
-                Huỷ
-              </button>
+              <textarea
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                placeholder="Nội dung cần thực hiện..."
+                rows={3}
+                disabled={loading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y disabled:opacity-50"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={loading || !title.trim()}
+                  className="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Thêm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowInput(false);
+                    setTitle("");
+                    setDesc("");
+                  }}
+                  className="px-4 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50"
+                >
+                  Huỷ
+                </button>
+              </div>
             </form>
           )}
 
