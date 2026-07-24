@@ -21,13 +21,44 @@ export function getTimelineColor(deadline: Date | null | undefined): TimelineCol
 
 export function getColorBadge(color: TimelineColor): string {
   const badges: Record<TimelineColor, string> = {
-    overdue: "🔥",
+    overdue: "⚫",
     today: "🔴",
     "1-2days": "🟠",
     "3-7days": "🟡",
     more7days: "🟢",
   };
   return badges[color];
+}
+
+export function getColorDot(color: TimelineColor): string {
+  const dots: Record<TimelineColor, string> = {
+    overdue: "bg-gray-800",
+    today: "bg-red-500",
+    "1-2days": "bg-orange-500",
+    "3-7days": "bg-yellow-400",
+    more7days: "bg-green-500",
+  };
+  return dots[color];
+}
+
+export function getColorLabel(color: TimelineColor): string {
+  const labels: Record<TimelineColor, string> = {
+    overdue: "Quá hạn",
+    today: "Hôm nay",
+    "1-2days": "1–2 ngày",
+    "3-7days": "3–7 ngày",
+    more7days: "Hơn 7 ngày",
+  };
+  return labels[color];
+}
+
+export function toDateInputValue(date: Date | null | undefined): string {
+  if (!date) return "";
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export function formatDate(date: Date | null | undefined): string {

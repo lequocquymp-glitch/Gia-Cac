@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Task } from "@/types";
+import {
+  getTimelineColor,
+  getColorDot,
+  getColorLabel,
+  formatDate,
+  toDateInputValue,
+} from "@/lib/timeline";
 import { Plus } from "lucide-react";
 
 export function TaskList({ projectId, tasks: initialTasks }: { projectId: string; tasks: Task[] }) {
@@ -67,6 +74,23 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
     }
   };
 
+  const handleDeadlineChange = async (taskId: string, value: string) => {
+    try {
+      await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deadline: value || null }),
+      });
+      const newDeadline = value ? new Date(value) : null;
+      setTasks(
+        tasks.map((t) => (t.id === taskId ? { ...t, deadline: newDeadline } : t))
+      );
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to update deadline", error);
+    }
+  };
+
   return (
     <div>
       {tasks.length === 0 && !showInput ? (
@@ -94,6 +118,14 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
                 >
                   {task.completed && <span className="text-blue-600">✓</span>}
                 </button>
+                {task.deadline && (
+                  <span
+                    className={`flex-shrink-0 w-2.5 h-2.5 rounded-full ${getColorDot(
+                      getTimelineColor(task.deadline)
+                    )}`}
+                    title={getColorLabel(getTimelineColor(task.deadline))}
+                  />
+                )}
                 <span
                   className={`flex-1 ${
                     task.completed
@@ -103,9 +135,20 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
                 >
                   {task.title}
                 </span>
+                {task.deadline && (
+                  <span className="text-xs text-gray-500 flex-shrink-0">
+                    {formatDate(task.deadline)}
+                  </span>
+                )}
+                <input
+                  type="date"
+                  value={toDateInputValue(task.deadline)}
+                  onChange={(e) => handleDeadlineChange(task.id, e.target.value)}
+                  className="flex-shrink-0 text-xs text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                />
                 <button
                   onClick={() => handleDelete(task.id)}
-                  className="text-xs text-red-600 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="text-xs text-red-600 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                 >
                   Delete
                 </button>
