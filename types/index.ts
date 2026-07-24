@@ -1,20 +1,20 @@
 export type Project = {
   id: string;
   name: string;
-  description?: string;
-  status: "active" | "archived";
+  description?: string | null;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
 };
 
 export type Task = {
   id: string;
-  projectId?: string;
+  projectId?: string | null;
   title: string;
-  description?: string;
+  description?: string | null;
   importance: string;
   status: string;
-  deadline?: Date;
+  deadline?: Date | null;
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -24,7 +24,7 @@ export type Knowledge = {
   id: string;
   projectId: string;
   title: string;
-  type: "sop" | "policy" | "workflow" | "checklist" | "guideline" | "meeting_note" | "document";
+  type: string;
   content: string;
   tags: string; // comma-separated
   createdAt: Date;
