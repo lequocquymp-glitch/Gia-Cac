@@ -1,11 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Upload } from "lucide-react";
+import { Download, Calendar, Copy, Check } from "lucide-react";
 
 export default function SettingsPage() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [notifications, setNotifications] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const calendarUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/api/calendar`
+      : "/api/calendar";
+
+  const handleCopyCalendarUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(calendarUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      alert(calendarUrl);
+    }
+  };
 
   const handleExportData = async () => {
     try {
@@ -43,6 +59,56 @@ export default function SettingsPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
       <div className="max-w-2xl space-y-8">
+        {/* Google Calendar */}
+        <div className="p-6 bg-white border border-blue-200 rounded-lg">
+          <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <Calendar size={20} className="text-blue-600" />
+            Google Calendar
+          </h2>
+          <p className="text-gray-600 mb-4 text-sm">
+            Công việc có deadline sẽ tự hiện trên Google Calendar và tự cập
+            nhật khi bạn đổi ngày, sửa, hoặc hoàn thành.
+          </p>
+          <div className="flex items-center gap-2 mb-4">
+            <input
+              type="text"
+              readOnly
+              value={calendarUrl}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 bg-gray-50"
+            />
+            <button
+              onClick={handleCopyCalendarUrl}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
+            >
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+              {copied ? "Đã copy" : "Copy link"}
+            </button>
+          </div>
+          <ol className="text-sm text-gray-600 space-y-1.5 list-decimal list-inside">
+            <li>Bấm "Copy link" ở trên</li>
+            <li>
+              Mở{" "}
+              <a
+                href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                Google Calendar → Thêm lịch từ URL
+              </a>
+            </li>
+            <li>Dán link vào ô "URL của lịch" → bấm "Thêm lịch"</li>
+            <li>
+              Lịch "Gia Các Command Center" sẽ hiện trong danh sách lịch của
+              bạn
+            </li>
+          </ol>
+          <p className="text-xs text-gray-400 mt-3">
+            Lưu ý: Google tự làm mới lịch đăng ký theo chu kỳ (thường vài
+            giờ một lần).
+          </p>
+        </div>
+
         {/* Theme */}
         <div className="p-6 bg-white border border-gray-200 rounded-lg">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Theme</h2>

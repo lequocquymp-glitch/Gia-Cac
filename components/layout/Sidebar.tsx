@@ -13,20 +13,22 @@ export function Sidebar() {
   };
 
   const links = [
-    { href: "/", icon: Home, label: "Home" },
-    { href: "/projects", icon: FolderOpen, label: "Projects" },
-    { href: "/search", icon: Search, label: "Search" },
-    { href: "/settings", icon: Settings, label: "Settings" },
+    { href: "/", icon: Home, label: "Trang chủ" },
+    { href: "/projects", icon: FolderOpen, label: "Dự án" },
+    { href: "/search", icon: Search, label: "Tìm kiếm" },
+    { href: "/settings", icon: Settings, label: "Cài đặt" },
   ];
 
   return (
-    <aside className="w-64 bg-blue-50 border-r border-blue-100 h-screen flex flex-col sticky top-0">
-      <div className="p-6 border-b border-blue-100">
-        <h1 className="text-2xl font-bold text-gray-900">Gia Các</h1>
-        <p className="text-xs text-gray-500 mt-1">Command Center</p>
+    <aside className="w-full md:w-64 bg-blue-600 md:h-screen flex flex-col md:sticky top-0 flex-shrink-0">
+      <div className="px-4 py-3 md:p-6 md:border-b md:border-blue-500">
+        <h1 className="text-lg md:text-2xl font-bold text-white">Gia Các</h1>
+        <p className="hidden md:block text-xs text-blue-200 mt-1">
+          Trung tâm chỉ huy
+        </p>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex md:flex-col md:flex-1 gap-1 md:gap-2 px-2 pb-2 md:px-4 md:py-6 overflow-x-auto">
         {links.map((link) => {
           const Icon = link.icon;
           const active = isActive(link.href);
@@ -35,20 +37,20 @@ export function Sidebar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-lg font-medium text-sm md:text-base transition-colors flex-shrink-0 ${
                 active
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-700 hover:bg-blue-100"
+                  ? "bg-white text-blue-700"
+                  : "text-blue-100 hover:bg-blue-500 hover:text-white"
               }`}
             >
-              <Icon size={20} />
+              <Icon size={18} />
               {link.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t border-blue-100 text-xs text-gray-500">
+      <div className="hidden md:block px-4 py-4 border-t border-blue-500 text-xs text-blue-200">
         <p>© 2026 Gia Các</p>
       </div>
     </aside>
