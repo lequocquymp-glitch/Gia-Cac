@@ -20,10 +20,18 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-full md:w-64 bg-blue-600 md:h-screen flex flex-col md:sticky top-0 flex-shrink-0">
-      <div className="px-4 py-3 md:p-6 md:border-b md:border-blue-500">
-        <h1 className="text-lg md:text-2xl font-bold text-white">Gia Các</h1>
-        <p className="hidden md:block text-xs text-blue-200 mt-1">
+    <aside
+      className="w-full md:w-64 md:h-screen flex flex-col md:sticky top-0 flex-shrink-0"
+      style={{
+        background:
+          "linear-gradient(180deg, #dff5ef 0%, #a9e3d6 30%, #6bcdbb 60%, #3fb3a1 100%)",
+      }}
+    >
+      <div className="px-4 py-3 md:p-6 md:border-b md:border-white/25">
+        <h1 className="text-lg md:text-2xl font-bold text-white drop-shadow-sm">
+          Gia Các
+        </h1>
+        <p className="hidden md:block text-xs text-white/80 mt-1">
           Trung tâm chỉ huy
         </p>
       </div>
@@ -39,8 +47,8 @@ export function Sidebar() {
               href={link.href}
               className={`flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-lg font-medium text-sm md:text-base transition-colors flex-shrink-0 ${
                 active
-                  ? "bg-white text-blue-700"
-                  : "text-blue-100 hover:bg-blue-500 hover:text-white"
+                  ? "bg-white text-teal-700"
+                  : "text-white/90 hover:bg-white/20 hover:text-white"
               }`}
             >
               <Icon size={18} />
@@ -50,7 +58,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="hidden md:block px-4 py-4 border-t border-blue-500 text-xs text-blue-200">
+      <div className="hidden md:block px-4 py-4 border-t border-white/25 text-xs text-white/80">
         <p>© 2026 Gia Các</p>
       </div>
     </aside>
