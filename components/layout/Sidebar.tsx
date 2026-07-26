@@ -4,6 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, FolderOpen, Search, Settings } from "lucide-react";
 
+const textOutline = {
+  textShadow:
+    "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 3px rgba(0,0,0,0.5)",
+};
+
 export function Sidebar() {
   const pathname = usePathname();
 
@@ -28,10 +33,10 @@ export function Sidebar() {
       }}
     >
       <div className="px-4 py-3 md:p-6 md:border-b md:border-white/25">
-        <h1 className="text-lg md:text-2xl font-bold text-white drop-shadow-sm">
+        <h1 className="text-lg md:text-2xl font-bold text-white" style={textOutline}>
           Gia Các
         </h1>
-        <p className="hidden md:block text-xs text-white/80 mt-1">
+        <p className="hidden md:block text-xs text-white/90 mt-1" style={textOutline}>
           Trung tâm chỉ huy
         </p>
       </div>
@@ -48,18 +53,21 @@ export function Sidebar() {
               className={`flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-lg font-medium text-sm md:text-base transition-colors flex-shrink-0 ${
                 active
                   ? "bg-white text-teal-700"
-                  : "text-white/90 hover:bg-white/20 hover:text-white"
+                  : "text-white hover:bg-white/20"
               }`}
             >
-              <Icon size={18} />
-              {link.label}
+              <Icon
+                size={18}
+                className={active ? undefined : "drop-shadow-[0_0_2px_black]"}
+              />
+              <span style={active ? undefined : textOutline}>{link.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="hidden md:block px-4 py-4 border-t border-white/25 text-xs text-white/80">
-        <p>© 2026 Gia Các</p>
+      <div className="hidden md:block px-4 py-4 border-t border-white/25 text-xs text-white/90">
+        <p style={textOutline}>© 2026 Gia Các</p>
       </div>
     </aside>
   );
