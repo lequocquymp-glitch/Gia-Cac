@@ -10,6 +10,7 @@ import {
   formatDate,
   toDateInputValue,
 } from "@/lib/timeline";
+import { getStatusBadge } from "@/lib/status";
 import { Plus } from "lucide-react";
 
 export function TaskList({ projectId, tasks: initialTasks }: { projectId: string; tasks: Task[] }) {
@@ -187,6 +188,8 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
       );
     }
 
+    const statusBadge = task.completed ? null : getStatusBadge(task.status);
+
     return (
       <div
         key={task.id}
@@ -199,6 +202,13 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
           >
             {task.completed && <span className="text-blue-600">✓</span>}
           </button>
+          {statusBadge && (
+            <span
+              className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${statusBadge.className}`}
+            >
+              {statusBadge.label}
+            </span>
+          )}
           {task.deadline && (
             <span
               className={`flex-shrink-0 w-2.5 h-2.5 rounded-full ${getColorDot(

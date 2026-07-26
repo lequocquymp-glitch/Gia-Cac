@@ -10,6 +10,7 @@ import {
   formatDate,
   toDateInputValue,
 } from "@/lib/timeline";
+import { getStatusBadge } from "@/lib/status";
 import { Check } from "lucide-react";
 
 export function TaskItem({ task }: { task: Task }) {
@@ -20,6 +21,7 @@ export function TaskItem({ task }: { task: Task }) {
   const [editDesc, setEditDesc] = useState(task.description ?? "");
   const color = getTimelineColor(task.deadline);
   const dot = getColorDot(color);
+  const statusBadge = task.completed ? null : getStatusBadge(task.status);
 
   const handleComplete = async () => {
     try {
@@ -166,6 +168,14 @@ export function TaskItem({ task }: { task: Task }) {
       >
         Sửa
       </button>
+
+      {statusBadge && (
+        <span
+          className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${statusBadge.className}`}
+        >
+          {statusBadge.label}
+        </span>
+      )}
 
       <div className="text-xs font-medium text-gray-500 flex-shrink-0 uppercase tracking-wide">
         {task.importance}
