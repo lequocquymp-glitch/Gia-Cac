@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Knowledge } from "@/types";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Pencil } from "lucide-react";
 
 export function KnowledgeList({
   projectId,
@@ -22,6 +22,9 @@ export function KnowledgeList({
     content: "",
   });
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({ title: "", type: "document", content: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +69,42 @@ export function KnowledgeList({
     }
   };
 
+  const startEdit = (item: Knowledge) => {
+    setEditData({ title: item.title, type: item.type, content: item.content });
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => setIsEditing(false);
+
+  const handleSaveEdit = async () => {
+    if (!selectedItem || !editData.title.trim()) return;
+
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/knowledge/${selectedItem.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editData.title.trim(),
+          type: editData.type,
+          content: editData.content.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setKnowledge(knowledge.map((k) => (k.id === updated.id ? updated : k)));
+        setSelectedItem(updated);
+        setIsEditing(false);
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Failed to update knowledge", error);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const typeColors: Record<string, string> = {
     sop: "bg-blue-100 text-blue-800",
     policy: "bg-purple-100 text-purple-800",
@@ -96,7 +135,10 @@ export function KnowledgeList({
               {knowledge.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => {
+                    setSelectedItem(item);
+                    setIsEditing(false);
+                  }}
                   className={`w-full text-left p-4 rounded-lg border transition-colors ${
                     selectedItem?.id === item.id
                       ? "border-blue-500 bg-blue-50"
@@ -217,36 +259,125 @@ export function KnowledgeList({
       {selectedItem && (
         <div className="lg:col-span-1">
           <div className="sticky top-8 p-4 bg-white border border-gray-200 rounded-lg">
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="font-bold text-gray-900 text-lg break-words">
-                {selectedItem.title}
-              </h3>
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2"
-              >
-                <X size={20} />
-              </button>
-            </div>
+            {isEditing ? (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editData.title}
+                    onChange={(e) =>
+                      setEditData({ ...editData, title: e.target.value })
+                    }
+                    autoFocus
+                    disabled={savingEdit}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  />
+                </div>
 
-            <span
-              className={`inline-block text-xs font-medium px-2 py-1 rounded mb-4 ${
-                typeColors[selectedItem.type] || typeColors.document
-              }`}
-            >
-              {selectedItem.type.replace("_", " ")}
-            </span>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Type
+                  </label>
+                  <select
+                    value={editData.type}
+                    onChange={(e) =>
+                      setEditData({ ...editData, type: e.target.value })
+                    }
+                    disabled={savingEdit}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    <option value="document">Document</option>
+                    <option value="sop">SOP</option>
+                    <option value="policy">Policy</option>
+                    <option value="workflow">Workflow</option>
+                    <option value="checklist">Checklist</option>
+                    <option value="guideline">Guideline</option>
+                    <option value="meeting_note">Meeting Note</option>
+                  </select>
+                </div>
 
-            <div className="prose prose-sm max-w-none mb-4 text-gray-700 whitespace-pre-wrap break-words">
-              {selectedItem.content}
-            </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Content
+                  </label>
+                  <textarea
+                    value={editData.content}
+                    onChange={(e) =>
+                      setEditData({ ...editData, content: e.target.value })
+                    }
+                    rows={8}
+                    disabled={savingEdit}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 resize-y"
+                  />
+                </div>
 
-            <button
-              onClick={() => handleDelete(selectedItem.id)}
-              className="w-full px-3 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
-            >
-              Delete
-            </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveEdit}
+                    disabled={savingEdit || !editData.title.trim()}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {savingEdit ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    disabled={savingEdit}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-bold text-gray-900 text-lg break-words">
+                    {selectedItem.title}
+                  </h3>
+                  <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                    <button
+                      onClick={() => startEdit(selectedItem)}
+                      className="text-gray-400 hover:text-blue-600 p-1"
+                      title="Edit"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedItem(null);
+                        setIsEditing(false);
+                      }}
+                      className="text-gray-400 hover:text-gray-600 p-1"
+                      title="Close"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                <span
+                  className={`inline-block text-xs font-medium px-2 py-1 rounded mb-4 ${
+                    typeColors[selectedItem.type] || typeColors.document
+                  }`}
+                >
+                  {selectedItem.type.replace("_", " ")}
+                </span>
+
+                <div className="prose prose-sm max-w-none mb-4 text-gray-700 whitespace-pre-wrap break-words">
+                  {selectedItem.content}
+                </div>
+
+                <button
+                  onClick={() => handleDelete(selectedItem.id)}
+                  className="w-full px-3 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  Delete
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
