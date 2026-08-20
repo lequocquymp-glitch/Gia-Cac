@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Task } from "@/types";
 import {
@@ -30,6 +30,38 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedDesc, setExpandedDesc] = useState<Set<string>>(new Set());
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  // Focus task khi mở project từ Trang chủ với ?task=<id> — chỉ đọc URL, không đổi dữ liệu
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get("task");
+    if (!taskId) return;
+
+    const target = tasks.find((t) => t.id === taskId);
+    if (!target) return;
+
+    setFilter("all");
+    if (target.completed) setShowCompleted(true);
+    if ((target.description?.length ?? 0) > DESC_CLAMP_THRESHOLD) {
+      setExpandedDesc((prev) => new Set(prev).add(taskId));
+    }
+    setHighlightedId(taskId);
+
+    const scrollTimer = setTimeout(() => {
+      document
+        .querySelector(`[data-task-id="${taskId}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+
+    const clearTimer = setTimeout(() => setHighlightedId(null), 4000);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(clearTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,10 +249,15 @@ export function TaskList({ projectId, tasks: initialTasks }: { projectId: string
     const isLongDesc = (task.description?.length ?? 0) > DESC_CLAMP_THRESHOLD;
     const isExpanded = expandedDesc.has(task.id);
 
+    const isHighlighted = task.id === highlightedId;
+
     return (
       <div
         key={task.id}
-        className="p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors group"
+        data-task-id={task.id}
+        className={`p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors duration-700 group ${
+          isHighlighted ? "ring-2 ring-blue-400 bg-blue-50" : ""
+        }`}
       >
         <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
           <button

@@ -11,6 +11,7 @@ import {
   toDateInputValue,
 } from "@/lib/timeline";
 import { getStatusBadge } from "@/lib/status";
+import { getImportanceLabel } from "@/lib/importance";
 import { Check } from "lucide-react";
 
 export function TaskItem({ task }: { task: Task }) {
@@ -22,6 +23,11 @@ export function TaskItem({ task }: { task: Task }) {
   const color = getTimelineColor(task.deadline);
   const dot = getColorDot(color);
   const statusBadge = task.completed ? null : getStatusBadge(task.status);
+
+  const handleOpenInProject = () => {
+    if (!task.projectId) return;
+    router.push(`/projects/${task.projectId}?task=${task.id}`);
+  };
 
   const handleComplete = async () => {
     try {
@@ -123,7 +129,11 @@ export function TaskItem({ task }: { task: Task }) {
         {task.completed && <Check size={16} className="text-blue-600" />}
       </button>
 
-      <div className="flex-1 min-w-0">
+      <div
+        onClick={task.projectId ? handleOpenInProject : undefined}
+        className={`flex-1 min-w-0 ${task.projectId ? "cursor-pointer" : ""}`}
+        title={task.projectId ? "Mở trong dự án" : undefined}
+      >
         <div className="flex items-center gap-2">
           {task.deadline && (
             <span
@@ -151,6 +161,7 @@ export function TaskItem({ task }: { task: Task }) {
             type="date"
             value={toDateInputValue(task.deadline)}
             onChange={(e) => handleDeadlineChange(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
             disabled={saving}
             className="text-xs text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:opacity-50"
           />
@@ -177,8 +188,8 @@ export function TaskItem({ task }: { task: Task }) {
         </span>
       )}
 
-      <div className="text-xs font-medium text-gray-500 flex-shrink-0 uppercase tracking-wide">
-        {task.importance}
+      <div className="text-xs font-medium text-gray-500 flex-shrink-0 tracking-wide">
+        {getImportanceLabel(task.importance)}
       </div>
     </div>
   );
